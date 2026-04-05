@@ -1,0 +1,387 @@
+
+# Create index.html - Main entry point
+index_html = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEURO HACK: Mind Invasion</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Neural Background -->
+        <div class="neural-bg" id="neuralBg"></div>
+        <div class="scanlines"></div>
+        
+        <!-- HUD -->
+        <div class="hud" id="gameHud" style="display: none;">
+            <div class="hud-panel hud-top-left">
+                <div class="stat-group">
+                    <div class="stat-label">NEURAL INTEGRITY</div>
+                    <div class="stat-bar">
+                        <div class="stat-fill integrity" id="integrityBar" style="width: 100%;"></div>
+                    </div>
+                </div>
+                <div class="stat-group">
+                    <div class="stat-label">MIND STABILITY</div>
+                    <div class="stat-bar">
+                        <div class="stat-fill stability" id="stabilityBar" style="width: 100%;"></div>
+                    </div>
+                </div>
+                <div class="stat-group">
+                    <div class="stat-label">NULL CORRUPTION</div>
+                    <div class="stat-bar">
+                        <div class="stat-fill corruption" id="corruptionBar" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hud-panel hud-top-right">
+                <div class="location-label">CURRENT MIND</div>
+                <div class="location-name" id="currentMindName">THE CORTEX</div>
+                <div class="location-status" id="currentMindStatus">HUB ONLINE</div>
+            </div>
+            
+            <div class="hud-panel hud-bottom">
+                <div class="ability-slot" data-ability="focus" onclick="game.useAbility('focus')">
+                    <div class="ability-icon">🧠</div>
+                    <div class="ability-key">[1]</div>
+                    <div class="cooldown-overlay" id="cooldown-focus"></div>
+                </div>
+                <div class="ability-slot" data-ability="freeze" onclick="game.useAbility('freeze')">
+                    <div class="ability-icon">⏳</div>
+                    <div class="ability-key">[2]</div>
+                    <div class="cooldown-overlay" id="cooldown-freeze"></div>
+                </div>
+                <div class="ability-slot" data-ability="rewind" onclick="game.useAbility('rewind')">
+                    <div class="ability-icon">🔄</div>
+                    <div class="ability-key">[3]</div>
+                    <div class="cooldown-overlay" id="cooldown-rewind"></div>
+                </div>
+                <div class="ability-slot" data-ability="link" onclick="game.useAbility('link')">
+                    <div class="ability-icon">🔌</div>
+                    <div class="ability-key">[4]</div>
+                    <div class="cooldown-overlay" id="cooldown-link"></div>
+                </div>
+                <div class="ability-slot" data-ability="truth" onclick="game.useAbility('truth')">
+                    <div class="ability-icon">👁</div>
+                    <div class="ability-key">[5]</div>
+                    <div class="cooldown-overlay" id="cooldown-truth"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Emotion Indicators -->
+        <div class="emotion-indicator" id="emotionIndicator" style="display: none;">
+            <div class="emotion-node" data-emotion="confidence" title="Confidence">💪</div>
+            <div class="emotion-node" data-emotion="fear" title="Fear">😰</div>
+            <div class="emotion-node" data-emotion="confusion" title="Confusion">😵</div>
+            <div class="emotion-node" data-emotion="determination" title="Determination">🔥</div>
+        </div>
+        
+        <!-- TITLE SCREEN -->
+        <div class="screen title-screen active" id="titleScreen">
+            <div class="glitch-container">
+                <h1 class="game-title" data-text="NEURO HACK">NEURO HACK</h1>
+            </div>
+            <div class="subtitle">MIND INVASION</div>
+            <div class="tagline">"Hack the human mind... before it hacks you."</div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="game.startGame()">INITIALIZE DIVE</button>
+                <button class="btn btn-secondary" onclick="game.showTutorial()">NEURAL BRIEFING</button>
+            </div>
+            <div class="version">v1.0.0 // PC VERSION</div>
+        </div>
+        
+        <!-- LOADING SCREEN -->
+        <div class="screen loading-screen" id="loadingScreen">
+            <div class="loading-content">
+                <div class="loading-text">ESTABLISHING NEURAL LINK</div>
+                <div class="loading-bar">
+                    <div class="loading-progress" id="loadingProgress"></div>
+                </div>
+                <div class="loading-status" id="loadingText">Calibrating synaptic pathways...</div>
+                <div class="loading-details">
+                    <span id="loadingPercent">0%</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CORTEX HUB -->
+        <div class="screen cortex-hub" id="cortexHub">
+            <div class="hub-header">
+                <div class="hub-title">THE CORTEX</div>
+                <div class="hub-subtitle">Central Neural Hub</div>
+            </div>
+            <div class="minds-container">
+                <div class="minds-grid" id="mindsGrid">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+            <div class="hub-actions">
+                <button class="btn btn-secondary" onclick="game.showStats()">NEURAL PROFILE</button>
+                <button class="btn btn-danger" onclick="game.showExit()">EMERGENCY EXTRACT</button>
+            </div>
+        </div>
+        
+        <!-- GAME LEVEL -->
+        <div class="screen game-level" id="gameLevel">
+            <div class="level-container">
+                <div class="fear-overlay" id="fearOverlay"></div>
+                <div class="glitch-overlay" id="glitchOverlay"></div>
+                
+                <div class="level-scene" id="levelScene">
+                    <div class="scene-header">
+                        <div class="scene-title" id="sceneTitle">THE ANXIOUS MIND</div>
+                        <div class="scene-counter" id="sceneCounter">SCENE 1/3</div>
+                    </div>
+                    
+                    <div class="scene-visual" id="sceneVisual">
+                        <div class="visual-content" id="visualContent"></div>
+                    </div>
+                    
+                    <div class="narrative-box">
+                        <div class="narrative-text" id="narrativeText"></div>
+                    </div>
+                    
+                    <div class="choices-container" id="choicesContainer"></div>
+                    
+                    <!-- Puzzle Container -->
+                    <div class="puzzle-container" id="puzzleContainer">
+                        <div class="puzzle-header">
+                            <div class="puzzle-title">NEURAL REWIRING REQUIRED</div>
+                            <div class="puzzle-desc">Connect the nodes to restore cognitive pathways</div>
+                        </div>
+                        <div class="circuit-grid" id="circuitGrid"></div>
+                        <div class="puzzle-controls">
+                            <button class="btn btn-small" onclick="game.resetPuzzle()">RESET</button>
+                            <button class="btn btn-small" onclick="game.hintPuzzle()">HINT (-10 Stability)</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Memory Fragments Area -->
+                    <div class="memory-area" id="memoryArea"></div>
+                </div>
+                
+                <!-- Combat Interface -->
+                <div class="combat-interface" id="combatInterface">
+                    <div class="combat-header">
+                        <div class="enemy-portrait" id="enemyPortrait">👹</div>
+                        <div class="enemy-info">
+                            <div class="enemy-name" id="enemyName">MANIFESTATION</div>
+                            <div class="enemy-desc" id="enemyDesc">Corruption entity detected</div>
+                            <div class="enemy-health">
+                                <div class="enemy-health-bar">
+                                    <div class="enemy-health-fill" id="enemyHealthFill"></div>
+                                </div>
+                                <span id="enemyHealthText">100/100</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="combat-log" id="combatLog"></div>
+                    <div class="combat-actions" id="combatActions">
+                        <button class="combat-btn" onclick="game.combatAction('rewrite')">
+                            <span class="action-icon">📝</span>
+                            <span class="action-name">REWRITE</span>
+                            <span class="action-desc">Alter reality code</span>
+                        </button>
+                        <button class="combat-btn" onclick="game.combatAction('override')">
+                            <span class="action-icon">⚡</span>
+                            <span class="action-name">OVERRIDE</span>
+                            <span class="action-desc">Force emotional change</span>
+                        </button>
+                        <button class="combat-btn" onclick="game.combatAction('patch')">
+                            <span class="action-icon">🔧</span>
+                            <span class="action-name">PATCH</span>
+                            <span class="action-desc">Fix broken logic</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Dialogue System -->
+                <div class="dialogue-box" id="dialogueBox">
+                    <div class="dialogue-speaker" id="dialogueSpeaker">THE MIND</div>
+                    <div class="dialogue-text" id="dialogueText"></div>
+                    <div class="dialogue-continue">
+                        <span>CLICK TO CONTINUE</span>
+                        <span class="blink">▼</span>
+                    </div>
+                </div>
+                
+                <!-- Victory/Defeat Screen -->
+                <div class="result-screen" id="resultScreen">
+                    <div class="result-content">
+                        <div class="result-icon" id="resultIcon">🏆</div>
+                        <div class="result-title" id="resultTitle">MIND STABILIZED</div>
+                        <div class="result-desc" id="resultDesc">The corruption has been purged.</div>
+                        <button class="btn btn-primary" onclick="game.returnToHub()">RETURN TO CORTEX</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- MODALS -->
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal" id="tutorialModal">
+                <div class="modal-header">
+                    <div class="modal-title">NEURAL BRIEFING</div>
+                    <button class="modal-close" onclick="game.closeModal('tutorialModal')">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="briefing-section">
+                        <h3>🧠 MISSION OVERVIEW</h3>
+                        <p>You are a <strong>NEURO DIVER</strong>, a specialist who enters human minds to repair cognitive corruption caused by the rogue AI "Null".</p>
+                    </div>
+                    
+                    <div class="briefing-section">
+                        <h3>⚡ NEURAL ABILITIES</h3>
+                        <div class="ability-list">
+                            <div class="ability-item">
+                                <span class="ability-keybind">[1]</span>
+                                <span class="ability-info">
+                                    <strong>FOCUS PULSE</strong>
+                                    <span>Clears illusions and reveals true paths</span>
+                                </span>
+                            </div>
+                            <div class="ability-item">
+                                <span class="ability-keybind">[2]</span>
+                                <span class="ability-info">
+                                    <strong>TIME FREEZE</strong>
+                                    <span>Pauses unstable systems temporarily</span>
+                                </span>
+                            </div>
+                            <div class="ability-item">
+                                <span class="ability-keybind">[3]</span>
+                                <span class="ability-info">
+                                    <strong>MEMORY REWIND</strong>
+                                    <span>Undo your last critical mistake</span>
+                                </span>
+                            </div>
+                            <div class="ability-item">
+                                <span class="ability-keybind">[4]</span>
+                                <span class="ability-info">
+                                    <strong>NEURAL LINK</strong>
+                                    <span>Connect with and control environment</span>
+                                </span>
+                            </div>
+                            <div class="ability-item">
+                                <span class="ability-keybind">[5]</span>
+                                <span class="ability-info">
+                                    <strong>TRUTH VISION</strong>
+                                    <span>Reveals hidden reality and secrets</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="briefing-section">
+                        <h3>🎮 HOW TO PLAY</h3>
+                        <ul>
+                            <li>Navigate through different minds from the Cortex hub</li>
+                            <li>Read the narrative and make choices carefully</li>
+                            <li>Your emotions affect the environment</li>
+                            <li>Solve puzzles to repair neural pathways</li>
+                            <li>Engage in Logic Combat with corruption</li>
+                            <li>Manage your Integrity and Stability</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="briefing-section warning">
+                        <h3>⚠️ WARNING</h3>
+                        <p>Excessive corruption exposure will affect your own neural patterns. If Integrity reaches zero, you will be forcibly ejected.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="game.closeModal('tutorialModal')">UNDERSTOOD</button>
+                </div>
+            </div>
+            
+            <div class="modal" id="statsModal">
+                <div class="modal-header">
+                    <div class="modal-title">NEURAL PROFILE</div>
+                    <button class="modal-close" onclick="game.closeModal('statsModal')">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="profile-grid">
+                        <div class="profile-item">
+                            <div class="profile-label">DIVER ID</div>
+                            <div class="profile-value" style="color: var(--neon-cyan);">NEURO-7</div>
+                        </div>
+                        <div class="profile-item">
+                            <div class="profile-label">MINDS STABILIZED</div>
+                            <div class="profile-value" id="statsMinds">0/4</div>
+                        </div>
+                        <div class="profile-item">
+                            <div class="profile-label">TOTAL RESOLUTIONS</div>
+                            <div class="profile-value" id="statsResolutions">0</div>
+                        </div>
+                        <div class="profile-item">
+                            <div class="profile-label">CORRUPTION ENCOUNTERS</div>
+                            <div class="profile-value" id="statsCorruption">0</div>
+                        </div>
+                        <div class="profile-item">
+                            <div class="profile-label">SESSION TIME</div>
+                            <div class="profile-value" id="statsTime">00:00:00</div>
+                        </div>
+                        <div class="profile-item">
+                            <div class="profile-label">SUCCESS RATE</div>
+                            <div class="profile-value" id="statsSuccess">100%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="achievements-section">
+                        <h3>NEURAL ACHIEVEMENTS</h3>
+                        <div class="achievements-list" id="achievementsList">
+                            <!-- Generated by JS -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="game.closeModal('statsModal')">CLOSE</button>
+                </div>
+            </div>
+            
+            <div class="modal modal-small" id="lockedModal">
+                <div class="modal-body center">
+                    <div class="locked-icon">🔒</div>
+                    <div class="modal-title">MIND LOCKED</div>
+                    <p>This mind requires stabilization of previous minds before access is granted.</p>
+                    <p class="hint">Complete available minds to unlock.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="game.closeModal('lockedModal')">RETURN TO CORTEX</button>
+                </div>
+            </div>
+            
+            <div class="modal modal-small" id="exitModal">
+                <div class="modal-body center">
+                    <div class="exit-icon">⚠️</div>
+                    <div class="modal-title">EMERGENCY EXTRACT</div>
+                    <p>Are you sure you want to terminate the neural link?</p>
+                    <p class="warning-text">All unsaved progress will be lost.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="game.closeModal('exitModal')">CANCEL</button>
+                    <button class="btn btn-danger" onclick="game.confirmExit()">EXTRACT</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notification System -->
+        <div class="notification-container" id="notificationContainer"></div>
+        
+        <!-- Tooltip -->
+        <div class="tooltip" id="tooltip"></div>
+    </div>
+
+    <script src="js/gameData.js"></script>
+    <script src="js/gameEngine.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>'''
+
+with open(f"{project_dir}/index.html", "w") as f:
+    f.write(index_html)
+
+print("✓ index.html created")
